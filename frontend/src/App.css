@@ -1,9 +1,145 @@
+
 #root {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+  min-height: 100vh;
 }
 
-main {
-  font-family: system-ui, sans-serif;
+.app-shell {
+  width: min(860px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0;
+}
+
+.app-header {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  color: #5b63d3;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+h1 {
+  margin: 8px 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.subtitle,
+.hint {
+  color: #666;
+  line-height: 1.6;
+}
+
+.panel {
+  margin-bottom: 24px;
+  padding: 24px;
+  border: 1px solid #e1e3e8;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.panel h2 {
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+
+.upload-form,
+.chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+input[type="file"],
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #d5d7df;
+  border-radius: 8px;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  align-self: flex-start;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #343c9e;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.upload-success {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #edf8f0;
+  overflow-wrap: anywhere;
+}
+
+.upload-success p {
+  margin-bottom: 0;
+}
+
+.messages {
+  display: grid;
+  gap: 18px;
+  margin: 20px 0;
+}
+
+.message-pair {
+  display: grid;
+  gap: 12px;
+}
+
+.question-bubble,
+.answer-bubble {
+  padding: 16px;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.question-bubble {
+  background: #f0f1ff;
+}
+
+.answer-bubble {
+  background: #f5f6f8;
+}
+
+.question-bubble p,
+.answer-bubble p {
+  margin-bottom: 0;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.error-message {
+  color: #b42318;
+  padding: 12px 16px;
+  background: #fff0ee;
+  border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+  .app-shell {
+    padding: 28px 0;
+  }
+
+  .panel {
+    padding: 18px;
+  }
 }
