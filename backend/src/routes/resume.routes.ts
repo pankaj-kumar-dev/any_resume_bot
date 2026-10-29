@@ -17,7 +17,8 @@ router.post(
       }
 
 
-      const extractedText = await extractPdfText(req.file.buffer);
+      // links are not stored yet; persistence is a separate task
+      const { text: extractedText } = await extractPdfText(req.file.buffer);
 
       const resume = await saveResume(req.file.originalname, extractedText);
 
