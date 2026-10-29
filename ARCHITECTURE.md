@@ -58,7 +58,7 @@ resume-chatbot/                      PROJECT ROOT (own git repo). Holds two apps
         └── assets/                  images imported by components (hero.png, react.svg, vite.svg)
 ```
 
-Outside this repo (parent folder `my_resume_bot/`): `docker-compose.yml` starts Postgres 17 for local dev.
+`docker-compose.yml` (project root) starts Postgres 17 for local dev.
 
 ## What each backend folder is responsible for
 
