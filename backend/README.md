@@ -26,7 +26,7 @@ Express + TypeScript API for the resume chatbot. Accepts a PDF, extracts its tex
 |---|---|---|---|
 | GET | `/api/health` | none | `{ status, service }` |
 | POST | `/api/resume/upload` | `form-data`, field `resume` (PDF, max 5 MB) | `{ message, resumeId, filename, characterCount }` |
-| POST | `/api/chat` | raw JSON `{ "resumeId": "...", "question": "..." }` | `{ resumeId, question, answer }` |
+| POST | `/api/chat` | raw JSON `{ "resumeId": "...", "question": "...", "history": [{ "role": "user" \| "assistant", "content": "..." }] }` (`history` optional, max 20 items) | `{ resumeId, question, answer }` |
 
 Common errors: `400` bad input, `404` resume id not found, `413` file too big, `502` LLM call failed (real reason is in the backend terminal log).
 
@@ -47,6 +47,8 @@ Request path: `route -> middleware -> service -> (repository) -> response`.
 ## Known state
 - Resumes are stored in Postgres through `repositories/resume.repository.ts`. The old in-memory store was removed.
 - `db/schema.sql` must be run once against the database to create the `resumes` table.
+- Ollama `num_ctx` not set: long inputs may be silently truncated.
+- Invalid (non-UUID) `resumeId` makes Postgres error, returned as 500.
 - No timeout on the Ollama call. First request after idle can be slow (model loads into RAM).
 
 ## Database (local)

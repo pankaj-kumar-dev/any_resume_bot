@@ -53,7 +53,7 @@ resume-chatbot/                      PROJECT ROOT (own git repo). Holds two apps
     ├── public/                      static files served as-is (favicon.svg, icons.svg)
     └── src/
         ├── main.tsx                 ENTRY. Mounts <App /> into #root
-        ├── App.tsx                  root component. Currently calls /api/health and shows status
+        ├── App.tsx                  root component: upload PDF, chat UI, keeps messages in state and sends them as `history`. Calls backend at http://localhost:3000 directly
         ├── App.css, index.css       styles
         └── assets/                  images imported by components (hero.png, react.svg, vite.svg)
 ```
@@ -88,13 +88,17 @@ POST /api/resume/upload  (form-data, field "resume")
 
 ### Chat
 ```
-POST /api/chat  (JSON { resumeId, question })
-  -> chat.routes.ts            validate fields, question <= 2000 chars
+POST /api/chat  (JSON { resumeId, question, history? })
+  -> chat.routes.ts            validate fields, question <= 2000 chars,
+                               history: array <= 20, role user|assistant, content <= 2000
   -> resume.repository.ts      getResume(resumeId), 404 if missing
-  -> llm.service.ts            prompt = rules + <resume>text</resume> + question -> Ollama
+  -> llm.service.ts            messages = system rules + last 10 history messages + (<resume>text</resume> + current question) -> Ollama
   <- { resumeId, question, answer }
      502 if Ollama fails (not running, model not pulled, etc.) (see terminal log for the real error)
 ```
+
+### Conversation memory
+The server stores no chat. The frontend keeps the messages and sends them back as `history` on every request. `llm.service.ts` uses only the last 10. The resume text is attached to the current question only, not repeated in history.
 
 ## Storage
 

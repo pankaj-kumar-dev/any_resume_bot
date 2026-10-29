@@ -7,7 +7,7 @@ This folder (`resume-chatbot/`) is the **project root**. It has its own git repo
 | Folder | What it is | Runs on |
 |---|---|---|
 | `backend/` | Express + TypeScript API. Handles PDF upload, text extraction, database, LLM calls. | `http://localhost:3000` |
-| `frontend/` | React + Vite + TypeScript UI. Currently a starter page that calls `/api/health`. | `http://localhost:5173` |
+| `frontend/` | React + Vite + TypeScript UI. Upload a PDF, then chat with it (sends conversation history). | `http://localhost:5173` |
 
 Each app has its **own** `package.json` and `node_modules`. There is no `package.json` in this root folder on purpose. Always `cd` into `backend/` or `frontend/` before running `npm install` or `npm run ...`.
 
@@ -46,5 +46,9 @@ npm run dev
 - `frontend/README.md` : default Vite template readme.
 
 ## Status
-- Done: PDF upload and text extraction, chat endpoint, local Ollama integration (via `fetch`), health check, resume storage in PostgreSQL (`repositories/`).
-- Todo: Ollama timeout/error handling, real frontend UI (upload + chat).
+- Done: React chat UI (upload + Q&A with conversation history), PDF upload and text extraction, chat endpoint, local Ollama integration (via `fetch`), health check, resume storage in PostgreSQL (`repositories/`).
+- Todo / known issues:
+  - Set Ollama `num_ctx`: long resume + history can be silently truncated.
+  - Frontend calls `http://localhost:3000` directly instead of the Vite `/api` proxy, so CORS only works from `:5173`.
+  - Ollama call has no timeout; invalid resume UUID returns 500 instead of 404.
+  - Chat and `resumeId` are lost on page refresh.
