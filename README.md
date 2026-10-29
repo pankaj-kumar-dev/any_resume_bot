@@ -25,7 +25,7 @@ Express backend (:3000)  ──►  PostgreSQL (docker)  /  Ollama (local, :1143
 ## Run locally
 
 ```bash
-# 0. prerequisites: Postgres running (docker compose up -d) and Ollama running with the model pulled:
+# 0. prerequisites: Postgres running (docker compose up -d) and Ollama running with the model pulled: ff
 #    ollama pull llama3.2:3b
 
 # 1. backend

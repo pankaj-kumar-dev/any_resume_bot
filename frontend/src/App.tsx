@@ -1,5 +1,5 @@
 
-import { useState, type FormEvent } from "react";
+import { useState, type DragEvent, type FormEvent } from "react";
 import "./App.css";
 
 const API_URL = "http://localhost:3000";
@@ -26,6 +26,7 @@ function App() {
   const [uploading, setUploading] = useState(false);
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState("");
+  const [dragging, setDragging] = useState(false);
 
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -111,67 +112,175 @@ function App() {
     }
   }
 
+  function selectFile(selected: File | null) {
+    setFile(selected);
+    setError("");
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setDragging(false);
+    if (uploading) return;
+    const dropped = event.dataTransfer.files?.[0];
+    if (!dropped) return;
+    if (dropped.type !== "application/pdf" && !/\.pdf$/i.test(dropped.name)) {
+      setFile(null);
+      setError("Please drop a PDF file.");
+      return;
+    }
+    selectFile(dropped);
+  }
+
+  const suggestions = [
+    "Summarize my experience",
+    "What are my technical skills?",
+    "Describe my best project",
+  ];
+
   return (
     <main className="app-shell">
       <header className="app-header">
-        <p className="eyebrow">PERSONAL AI ASSISTANT</p>
-        <h1>Resume Chatbot</h1>
-        <p className="subtitle">
-          Upload your resume and ask questions about your experience.
-        </p>
+        <div className="brand-mark" aria-hidden="true">
+          R
+        </div>
+        <div>
+          <h1>Resume Chatbot</h1>
+          <p className="subtitle">
+            Ask questions about your uploaded resume.
+          </p>
+        </div>
       </header>
 
-      <section className="panel">
-        <h2>1. Upload your resume</h2>
+      <section className="panel" aria-labelledby="upload-title">
+        <div className="panel-head">
+          <h2 id="upload-title">Upload your resume</h2>
+          <p className="panel-text">
+            PDF only. Text is extracted so you can chat about it below.
+          </p>
+        </div>
+
         <form onSubmit={handleUpload} className="upload-form">
-          <input
-            type="file"
-            accept=".pdf,application/pdf"
-            onChange={(event) => {
-              setFile(event.target.files?.[0] ?? null);
-              setError("");
+          <label
+            className={`dropzone${dragging ? " is-dragging" : ""}${
+              uploading ? " is-disabled" : ""
+            }`}
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (!uploading) setDragging(true);
             }}
-          />
-          <button type="submit" disabled={!file || uploading}>
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+          >
+            <input
+              type="file"
+              accept=".pdf,application/pdf"
+              disabled={uploading}
+              onChange={(event) => selectFile(event.target.files?.[0] ?? null)}
+            />
+            <span className="dropzone-icon" aria-hidden="true">
+              ↑
+            </span>
+            <span className="dropzone-title">
+              {file ? file.name : "Drop your PDF here or click to browse"}
+            </span>
+            <span className="dropzone-sub">
+              {file
+                ? `${(file.size / 1024).toFixed(0)} KB · ready to upload`
+                : "Only .pdf files are accepted"}
+            </span>
+          </label>
+          <button
+            type="submit"
+            className="btn"
+            disabled={!file || uploading}
+          >
+            {uploading && <span className="spinner" aria-hidden="true" />}
             {uploading ? "Uploading..." : "Upload PDF"}
           </button>
         </form>
 
         {resume && (
-          <div className="upload-success">
-            <strong>Resume uploaded successfully</strong>
-            <p>{resume.filename}</p>
-            <p>{resume.characterCount.toLocaleString()} characters extracted</p>
+          <div className="upload-success" role="status">
+            <span className="check" aria-hidden="true">
+              ✓
+            </span>
+            <div>
+              <strong>Resume uploaded successfully</strong>
+              <p>{resume.filename}</p>
+              <p>
+                {resume.characterCount.toLocaleString()} characters extracted
+              </p>
+            </div>
           </div>
         )}
       </section>
 
-      <section className="panel">
-        <h2>2. Ask your resume</h2>
-
-        {!resume && (
-          <p className="hint">Upload a resume before asking questions.</p>
-        )}
+      <section className="panel" aria-labelledby="chat-title">
+        <div className="panel-head">
+          <h2 id="chat-title">Ask your resume</h2>
+          <p className="panel-text">
+            {resume
+              ? "Answers are generated from your uploaded resume."
+              : "Upload a resume before asking questions."}
+          </p>
+        </div>
 
         <div className="messages" aria-live="polite">
+          {messages.length === 0 && !asking && (
+            <div className="empty-state">
+              {resume
+                ? "No questions yet. Ask something below."
+                : "Your conversation will appear here."}
+            </div>
+          )}
+
           {messages.map((message, index) => (
             <article className="message-pair" key={`${index}-${message.question}`}>
               <div className="question-bubble">
-                <strong>You</strong>
+                <span className="message-label">You</span>
                 <p>{message.question}</p>
               </div>
               <div className="answer-bubble">
-                <strong>AI assistant</strong>
+                <span className="message-label">AI assistant</span>
                 <p>{message.answer}</p>
               </div>
             </article>
           ))}
 
-          {asking && <p className="hint">Generating an answer...</p>}
+          {asking && (
+            <div className="answer-bubble typing" role="status">
+              <span className="message-label">AI assistant</span>
+              <span className="dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="sr-only">Generating an answer...</span>
+            </div>
+          )}
         </div>
 
+        {resume && !asking && (
+          <div className="chips" aria-label="Suggested questions">
+            {suggestions.map((text) => (
+              <button
+                type="button"
+                className="chip"
+                key={text}
+                onClick={() => setQuestion(text)}
+              >
+                {text}
+              </button>
+            ))}
+          </div>
+        )}
+
         <form onSubmit={handleAsk} className="chat-form">
+          <label className="sr-only" htmlFor="question">
+            Your question
+          </label>
           <textarea
+            id="question"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder="e.g. Summarize my technical skills"
@@ -181,8 +290,10 @@ function App() {
           />
           <button
             type="submit"
+            className="btn"
             disabled={!resume || !question.trim() || asking}
           >
+            {asking && <span className="spinner" aria-hidden="true" />}
             {asking ? "Thinking..." : "Ask question"}
           </button>
         </form>
