@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { uploadResume } from "../middleware/upload.middleware.js";
 import { extractPdfText } from "../services/pdf.service.js";
-
+import { saveResume } from "../repositories/resume.repository.js";
 const router = Router();
 
 router.post(
@@ -16,13 +16,16 @@ router.post(
         return;
       }
 
+
       const extractedText = await extractPdfText(req.file.buffer);
+
+      const resume = await saveResume(req.file.originalname, extractedText);
 
       res.status(200).json({
         message: "PDF uploaded and text extracted successfully.",
-        filename: req.file.originalname,
-        characterCount: extractedText.length,
-        extractedText,
+        resumeId: resume.id,
+        filename: resume.filename,
+        characterCount: resume.extractedText.length,
       });
     } catch (error) {
       next(error);

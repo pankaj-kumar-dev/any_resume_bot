@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import resumeRoutes from "./routes/resume.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
 
 const app = express();
 
@@ -12,7 +13,7 @@ app.use(
 );
 
 app.use(express.json());
-
+app.use("/api/chat", chatRoutes);
 app.get("/api/health", (_req, res) => {
   res.status(200).json({
     status: "ok",
